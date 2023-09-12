@@ -1,0 +1,27 @@
+[
+    {
+        "title": "Smart 4K UHD TV",
+        "description": "Experience stunning 4K Ultra High Definition visuals with this smart TV. Stream your favorite shows and movies effortlessly.",
+        "price": 699.99
+    },
+    {
+        "title": "Wireless Noise-Canceling Headphones",
+        "description": "Enjoy immersive audio with these wireless headphones. Active noise cancellation technology blocks out distractions.",
+        "price": 199.99
+    },
+    {
+        "title": "Digital SLR Camera Kit",
+        "description": "Capture professional-quality photos and videos with this DSLR camera kit. It includes a high-resolution camera body and versatile lenses.",
+        "price": 1199.00
+    },
+    {
+        "title": "Stainless Steel Refrigerator",
+        "description": "Keep your groceries fresh and organized with this spacious stainless steel refrigerator. Features include adjustable shelves and a water dispenser.",
+        "price": 999.99
+    },
+    {
+        "title": "Fitness Tracker Watch",
+        "description": "Stay active and monitor your health with this fitness tracker watch. Track your steps, heart rate, and sleep patterns.",
+        "price": 49.95
+    }
+]
