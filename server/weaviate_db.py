@@ -32,7 +32,7 @@ schema = {
             ],
             "vectorizer": "text2vec-huggingface",
             "moduleConfig": {
-                "model": "sentence-transformers/all-MiniLM-L6-v2",
+                "model": "BAAI/bge-base-en",
             }
         }
     ],
@@ -64,17 +64,18 @@ for product_info in product_data:
 for product in vectorized_products:
     print(product)
     client.data_object.create(product, "Product")
+print()
+print("Data Entered Successfully")
 
-
-for input in sys.stdin:
-    response = (
-        client.query
-        .get("Product", ["title", "description", "price"])
-        .with_near_text({
-            "concepts": [input]
-        }).with_limit(1)
-        .with_additional(["distance"])
-        .do()
-    )
+# for input in sys.stdin:
+#     response = (
+#         client.query
+#         .get("Product", ["title", "description", "price"])
+#         .with_near_text({
+#             "concepts": [input]
+#         }).with_limit(1)
+#         .with_additional(["distance"])
+#         .do()
+#     )
     
-    print(json.dumps(response, indent=2))
+#     print(json.dumps(response, indent=2))
