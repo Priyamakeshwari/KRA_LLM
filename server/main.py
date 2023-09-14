@@ -1,7 +1,14 @@
 from flask import Flask, request,jsonify
+from flask_socketio import SocketIO, send, emit
 from auth.auth import register_user, generate_token, login_user
+from engine import  load_model
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 
 app = Flask(__name__)
+app.config['SECRET'] = "12345"
+socketio = SocketIO(app, cors_allowed_origins="*")
+llm_chain = load_model()
 
 @app.route('/')
 def index():
@@ -61,6 +68,26 @@ def login():
         response = jsonify({'message': 'Login successful!', 'token': token, 'user_id':authenticated[1]})
         response.set_cookie('access_token', token, httponly=True, secure=True, samesite='Lax')
         return response
+
+@app.route('/api/chat', methods=['GET']) 
+def chat():
+    try:
+        user_input = request.get_json()['user_input']
+        # print(user_input)
+        global llm_chain
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=4096,
+            chunk_overlap=256, 
+            length_function=len,
+        )
+        chunks = text_splitter.split_text(user_input)
+        response = llm_chain.run(chunks)
+        return jsonify({
+            "message": response
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 
 if __name__ == '__main__':
