@@ -1,5 +1,5 @@
 import { Routes , BrowserRouter, Route } from 'react-router-dom'
-import Login from './components/auth/login'
+import Login from './components/auth/Login'
 import SignUp from './components/auth/SignUp'
 import Chat from './components/chat/Chat'
 
