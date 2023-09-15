@@ -1,195 +1,197 @@
-import React from "react";
+import React, { useState } from "react";
+import Sidebar from "./Sidebar";
+import { FcSpeaker } from "react-icons/fc";
+import { HiMiniSpeakerWave, HiSpeakerWave } from "react-icons/hi2";
+
+import { useSpeechSynthesis } from "react-speech-kit";
+import CodeBlock from "./CodeBlock";
+
+function renderTextWithCodeBlocks(text) {
+  const paragraphs = text.split(/\n\n/);
+
+  // Initialize an array to hold paragraphs and code blocks
+  const result = [];
+
+  // Regular expression to identify SQL code blocks
+  const sqlRegex = /sql(.*?);/s;
+
+  paragraphs.forEach((paragraph, index) => {
+    // Check if the paragraph matches the SQL regex
+    const match = paragraph.match(sqlRegex);
+    if (match) {
+      // If it's a code block, add it as a CodeBlock component
+      const code = match[1].trim();
+      result.push(<CodeBlock key={index} code={code} />);
+    } else {
+      // If it's regular text, add it as a paragraph
+      result.push(<p key={index}>{paragraph}</p>);
+    }
+  });
+
+  return result;
+}
 
 function Chat() {
+  const exampleText = `
+
+   This is the normal text 
+
+  sql SELECT * FROM customers
+  WHERE Income > (
+    SELECT AVG(Income)
+    FROM customers
+  );
+
+  This query uses a subquery to find the average income of all customers.
+
+  sql SELECT Name, Age FROM customers WHERE Age > 30;
+  Another SQL query to retrieve names and ages of customers above 30.
+
+    
+  `;
+
+  const [chatMessages, setChatMessages] = useState([]);
+  const [userInput, setUserInput] = useState("");
+
+  const [text, setText] = useState("hey man ");
+
+  const { speak } = useSpeechSynthesis();
+
+  const handleOnClick = () => {
+    speak({ text: text });
+  };
+
+  const sendMessageToAPI = async (message) => {
+    try {
+      const response = await fetch("http://172.20.10.2:5100/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ user_input: message }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        console.log(data);
+
+        return data.answer;
+      } else {
+        throw new Error("API request failed");
+      }
+    } catch (error) {
+      console.error("Error sending message to API:", error);
+      return "An error occurred while processing your request.";
+    }
+  };
+
+  const handleUserMessageSubmit = async () => {
+    if (userInput.trim() === "") {
+      return;
+    }
+
+    // Update chatMessages using prevState pattern
+    setChatMessages((prevState) => [
+      ...prevState,
+      { text: userInput, isUserMessage: true },
+    ]);
+
+    try {
+      // Send the user's message to the API and get the chatbot's response
+      const chatbotResponse = await sendMessageToAPI(userInput);
+
+      // Update chatMessages with the chatbot's response
+      setChatMessages((prevState) => [
+        ...prevState,
+        { text: chatbotResponse, isUserMessage: false },
+      ]);
+
+      // Clear the input field
+      setUserInput("");
+    } catch (error) {
+      // Handle any errors that occur during the API request
+      console.error("Error sending message to API:", error);
+      // You can update the state or show an error message to the user here
+    }
+  };
+
   return (
-    <>
-      <div class="container mx-auto shadow-lg rounded-lg">
-        <div class="px-5 py-5 flex justify-between items-center bg-white border-b-2">
-          <div class="font-semibold text-2xl">GoingChat </div>
-          {/* <div class="w-1/2">
-            <input
-              type="text"
-              name=""
-              id=""
-              placeholder="search IRL"
-              class="rounded-2xl bg-gray-100 py-3 px-5 w-full"
-            />
-          </div> */}
-          <div class="h-12 w-12 p-2 bg-yellow-500 rounded-full text-white font-semibold flex items-center justify-center">
-            AN
-          </div>
-        </div>
+    <div className="flex  overflow-hidden  ">
+      <Sidebar />
 
-        
-        <div class="flex flex-row justify-between bg-white">
-          <div class="flex flex-col w-2/5 border-r-2 overflow-y-auto">
-            <div class="border-b-2 py-4 px-2">
-              <input
-                type="text"
-                placeholder="search chatting"
-                class="py-2 px-2 border-2 border-gray-200 rounded-2xl w-full"
-              />
-            </div>
-            <div class="flex flex-row py-4 px-2 justify-center items-center border-b-2">
-              <div class="w-1/4">
-                <img
-                  src="https://source.unsplash.com/_7LbC5J-jw4/600x600"
-                  class="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div class="w-full">
-                <div class="text-lg font-semibold">Luis1994</div>
-                <span class="text-gray-500">Pick me at 9:00 Am</span>
-              </div>
-            </div>
-            <div class="flex flex-row py-4 px-2 items-center border-b-2">
-              <div class="w-1/4">
-                <img
-                  src="https://source.unsplash.com/otT2199XwI8/600x600"
-                  class="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div class="w-full">
-                <div class="text-lg font-semibold">Everest Trip 2021</div>
-                <span class="text-gray-500">Hi Sam, Welcome</span>
-              </div>
-            </div>
-            <div class="flex flex-row py-4 px-2 items-center border-b-2 border-l-4 border-blue-400">
-              <div class="w-1/4">
-                <img
-                  src="https://source.unsplash.com/L2cxSuKWbpo/600x600"
-                  class="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div class="w-full">
-                <div class="text-lg font-semibold">MERN Stack</div>
-                <span class="text-gray-500">Lusi : Thanks Everyone</span>
-              </div>
-            </div>
-            <div class="flex flex-row py-4 px-2 items-center border-b-2">
-              <div class="w-1/4">
-                <img
-                  src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                  class="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div class="w-full">
-                <div class="text-lg font-semibold">Javascript Indonesia</div>
-                <span class="text-gray-500">Evan : some one can fix this</span>
-              </div>
-            </div>
-            <div class="flex flex-row py-4 px-2 items-center border-b-2">
-              <div class="w-1/4">
-                <img
-                  src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                  class="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div class="w-full">
-                <div class="text-lg font-semibold">Javascript Indonesia</div>
-                <span class="text-gray-500">Evan : some one can fix this</span>
-              </div>
-            </div>
+      <div className="flex flex-col flex-grow ">
+        <div className="container mx-auto flex-grow">
+          <div className="w-[90%] mx-auto border rounded shadow-lg bg-white flex-grow">
+            <div>
+              <div className="w-[90%">
+                <div className="relative p-6 overflow-y-auto h-[93vh] bg-gradient-to-b">
+                  <ul className="space-y-6">
+                    {chatMessages.map((message, index) => (
+                      <li
+                        key={index}
+                        className={`${
+                          message.isUserMessage
+                            ? "flex justify-end"
+                            : "flex justify-start"
+                        } my-0`}
+                      >
+                        <div
+                          className={`relative max-w-xl px-4 py-2 text-blue-800 bg-blue-100 rounded shadow ${
+                            message.isUserMessage ? "flex flex-col" : ""
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            {message.isUserMessage ? (
+                              <img
+                                className="w-12 h-12 rounded-full"
+                                src="/user.avif"
+                                alt=""
+                              />
+                            ) : (
+                              <img
+                                className="w-12 h-12 rounded-full"
+                                src="/bot.jpg"
+                                alt=""
+                              />
+                            )}
+                          </div>
 
-            <div class="flex flex-row py-4 px-2 items-center border-b-2">
-              <div class="w-1/4">
-                <img
-                  src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                  class="object-cover h-12 w-12 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div class="w-full">
-                <div class="text-lg font-semibold">Javascript Indonesia</div>
-                <span class="text-gray-500">Evan : some one can fix this</span>
-              </div>
-            </div>
-          </div>
-          <div class="w-full px-5 flex flex-col justify-between">
-            <div class="flex flex-col mt-5">
-              <div class="flex justify-end mb-4">
-                <div class="mr-2 py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white">
-                  Welcome to group everyone !
+                          <span className="block">{message.text}</span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <img
-                  src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                  class="object-cover h-8 w-8 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div class="flex justify-start mb-4">
-                <img
-                  src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                  class="object-cover h-8 w-8 rounded-full"
-                  alt=""
-                />
-                <div class="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Quaerat at praesentium, aut ullam delectus odio error sit rem.
-                  Architecto nulla doloribus laborum illo rem enim dolor odio
-                  saepe, consequatur quas?
-                </div>
-              </div>
-              <div class="flex justify-end mb-4">
-                <div>
-                  <div class="mr-2 py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white">
-                    Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                    Magnam, repudiandae.
-                  </div>
 
-                  <div class="mt-4 mr-2 py-3 px-4 bg-blue-400 rounded-bl-3xl rounded-tl-3xl rounded-tr-xl text-white">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Debitis, reiciendis!
-                  </div>
+                <div className="flex items-center justify-between w-full p-3 border-t border-gray-300 bg-gray-100">
+                  <input
+                    type="text"
+                    placeholder="Message"
+                    className="block w-full py-2 pl-4 mx-3 bg-gray-200 rounded-full outline-none focus:text-gray-800"
+                    name="message"
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    required
+                  />
+
+                  <button type="submit" onClick={handleUserMessageSubmit}>
+                    <svg
+                      className="w-5 h-5 text-green-500 origin-center transform rotate-90"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                  </button>
                 </div>
-                <img
-                  src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                  class="object-cover h-8 w-8 rounded-full"
-                  alt=""
-                />
-              </div>
-              <div class="flex justify-start mb-4">
-                <img
-                  src="https://source.unsplash.com/vpOeXr5wmR4/600x600"
-                  class="object-cover h-8 w-8 rounded-full"
-                  alt=""
-                />
-                <div class="ml-2 py-3 px-4 bg-gray-400 rounded-br-3xl rounded-tr-3xl rounded-tl-xl text-white">
-                  happy holiday guys!
-                </div>
-              </div>
-            </div>
-            <div class="py-5">
-              <input
-                class="w-full bg-gray-300 py-5 px-3 rounded-xl"
-                type="text"
-                placeholder="type your message here..."
-              />
-            </div>
-          </div>
-          <div class="w-2/5 border-l-2 px-5">
-            <div class="flex flex-col">
-              <div class="font-semibold text-xl py-4">Mern Stack Group</div>
-              <img
-                src="https://source.unsplash.com/L2cxSuKWbpo/600x600"
-                class="object-cover rounded-xl h-64"
-                alt=""
-              />
-              <div class="font-semibold py-4">Created 22 Sep 2021</div>
-              <div class="font-light">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Deserunt, perspiciatis!
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
