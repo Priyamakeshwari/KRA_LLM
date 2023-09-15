@@ -79,24 +79,21 @@ def chat():
     """
     global llm_chain
     user_input = request.get_json()['user_input']
-    print(user_input)
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=4096,
-        chunk_overlap=256, 
-        length_function=len,
-    )
-    chunks = text_splitter.split_text(user_input)
-    print(chunks)
-    response = llm_chain.run(chunks)
+    # print(user_input)
+    # text_splitter = RecursiveCharacterTextSplitter(
+    #     chunk_size=4096,
+    #     chunk_overlap=256, 
+    #     length_function=len,
+    # )
+    # chunks = text_splitter.split_text(user_input)
+    # print(chunks)
+    response = llm_chain.run(user_input)
     return {
-        "response": response,
+        "response": response
     }
-
-
-
 
 
 if __name__ == '__main__':
 
-    app.run(host='0.0.0.0', port=5100, debug=True)
+    app.run(port=5000, debug=True)
 
