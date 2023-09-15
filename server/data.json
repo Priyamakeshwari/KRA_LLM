@@ -1,27 +1,100 @@
 [
     {
-        "title": "Smart 4K UHD TV",
-        "description": "Experience stunning 4K Ultra High Definition visuals with this smart TV. Stream your favorite shows and movies effortlessly.",
-        "price": 699.99
-    },
-    {
-        "title": "Wireless Noise-Canceling Headphones",
-        "description": "Enjoy immersive audio with these wireless headphones. Active noise cancellation technology blocks out distractions.",
-        "price": 199.99
-    },
-    {
-        "title": "Digital SLR Camera Kit",
-        "description": "Capture professional-quality photos and videos with this DSLR camera kit. It includes a high-resolution camera body and versatile lenses.",
-        "price": 1199.00
-    },
-    {
-        "title": "Stainless Steel Refrigerator",
-        "description": "Keep your groceries fresh and organized with this spacious stainless steel refrigerator. Features include adjustable shelves and a water dispenser.",
-        "price": 999.99
-    },
-    {
-        "title": "Fitness Tracker Watch",
-        "description": "Stay active and monitor your health with this fitness tracker watch. Track your steps, heart rate, and sleep patterns.",
-        "price": 49.95
-    }
+        "Cust_ID": 1,
+        "Name": "John Smith",
+        "Age": 35,
+        "Gender": "Male",
+        "Location": "New York",
+        "Marital_Status": "Married",
+        "Education": "Bachelor's Degree",
+        "Occupation": "Software Engineer",
+        "MOB": "123-456-7890",
+        "Income": 75000,
+        "Dependents": 2,
+        "Digital_ind": true,
+        "Phone": "iPhone X",
+        "Address": "123 Main Street"
+      },
+      {
+        "Cust_ID": 2,
+        "Name": "Jane Doe",
+        "Age": 28,
+        "Gender": "Female",
+        "Location": "Los Angeles",
+        "Marital_Status": "Single",
+        "Education": "Master's Degree",
+        "Occupation": "Marketing Manager",
+        "MOB": "987-654-3210",
+        "Income": 60000,
+        "Dependents": 0,
+        "Digital_ind": true,
+        "Phone": "Samsung Galaxy S21",
+        "Address": "456 Elm Street"
+      },
+      {
+        "Cust_ID": 3,
+        "Name": "Michael Johnson",
+        "Age": 45,
+        "Gender": "Male",
+        "Location": "Chicago",
+        "Marital_Status": "Divorced",
+        "Education": "High School Diploma",
+        "Occupation": "Truck Driver",
+        "MOB": "555-123-7890",
+        "Income": 45000,
+        "Dependents": 3,
+        "Digital_ind": false,
+        "Phone": "Motorola G Power",
+        "Address": "789 Oak Avenue"
+      },
+      {
+        "Cust_ID": 4,
+        "Name": "Emily White",
+        "Age": 30,
+        "Gender": "Female",
+        "Location": "San Francisco",
+        "Marital_Status": "Married",
+        "Education": "Doctorate",
+        "Occupation": "Medical Doctor",
+        "MOB": "222-333-4444",
+        "Income": 100000,
+        "Dependents": 1,
+        "Digital_ind": true,
+        "Phone": "Google Pixel 5",
+        "Address": "567 Maple Lane"
+      },
+      {
+        "Cust_ID": 5,
+        "Name": "David Lee",
+        "Age": 40,
+        "Gender": "Male",
+        "Location": "Houston",
+        "Marital_Status": "Married",
+        "Education": "Bachelor's Degree",
+        "Occupation": "Accountant",
+        "MOB": "777-888-9999",
+        "Income": 80000,
+        "Dependents": 2,
+        "Digital_ind": true,
+        "Phone": "iPhone 12",
+        "Address": "101 Pine Street"
+      }
+,
+{
+    "Cust_ID": 6,
+    "Name": "Sarah Adams",
+    "Age": 35,
+    "Gender": "Female",
+    "Location": "Miami",
+    "Marital_Status": "Single",
+    "Education": "Bachelor's Degree",
+    "Occupation": "Graphic Designer",
+    "MOB": "333-555-7777",
+    "Income": 55000,
+    "Dependents": 0,
+    "Digital_ind": true,
+    "Phone": "Samsung Galaxy Note 20",
+    "Address": "202 Cedar Road"
+  }
+  
 ]

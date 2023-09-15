@@ -1,14 +1,16 @@
-from flask import Flask, request,jsonify
+
+from flask import Flask, request,jsonify, stream_with_context
 from flask_socketio import SocketIO, send, emit
 from auth.auth import register_user, generate_token, login_user
 from engine import  load_model
+import datetime
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-
 
 app = Flask(__name__)
 app.config['SECRET'] = "12345"
-socketio = SocketIO(app, cors_allowed_origins="*")
+
 llm_chain = load_model()
+print("Model loaded")
 
 @app.route('/')
 def index():
@@ -69,26 +71,32 @@ def login():
         response.set_cookie('access_token', token, httponly=True, secure=True, samesite='Lax')
         return response
 
-@app.route('/api/chat', methods=['GET']) 
+
+@app.route("/api/chat",methods=['POST'])
 def chat():
-    try:
-        user_input = request.get_json()['user_input']
-        # print(user_input)
-        global llm_chain
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=4096,
-            chunk_overlap=256, 
-            length_function=len,
-        )
-        chunks = text_splitter.split_text(user_input)
-        response = llm_chain.run(chunks)
-        return jsonify({
-            "message": response
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    """
+    Endpoint to chat with the bot.
+    """
+    global llm_chain
+    user_input = request.get_json()['user_input']
+    print(user_input)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=4096,
+        chunk_overlap=256, 
+        length_function=len,
+    )
+    chunks = text_splitter.split_text(user_input)
+    print(chunks)
+    response = llm_chain.run(chunks)
+    return {
+        "response": response,
+    }
+
+
 
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+
+    app.run(host='0.0.0.0', port=5100, debug=True)
+

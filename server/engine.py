@@ -4,6 +4,11 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
+<<<<<<< HEAD
+=======
+MODEL_PATH = "./models/llama-2-13b-chat.Q5_K_M.gguf"
+ 
+>>>>>>> d4302be (update)
 
 MODEL_PATH = "./models/llama-2-13b-chat.Q5_K_M.gguf"
 
@@ -36,3 +41,19 @@ def load_model() -> LLMChain:
     llm_chain = LLMChain(llm=llm_model,prompt=prompt)
     return llm_chain
 
+<<<<<<< HEAD
+=======
+if __name__ == "__main__":
+    llm_chain = load_model()
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=4096,
+        chunk_overlap=256, 
+        length_function=len,
+    )
+    chunks = text_splitter.split_text("hello")
+    print(chunks)
+    response = llm_chain.run(chunks)
+
+
+    print(llm_chain([HumanMessage(content="Tell me a joke")])['text'])
+>>>>>>> d4302be (update)

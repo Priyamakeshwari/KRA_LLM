@@ -1,81 +1,51 @@
 import weaviate
 import json
-import sys
 import uuid
+
+# Connect to the Weaviate server
 client = weaviate.Client("http://localhost:8080")
 
 # Delete any existing schema (optional)
 client.schema.delete_all()
 
-# Define the schema for the class with a vectorizer
+# Define the schema for the "Customer" class
 schema = {
     "classes": [
         {
-            "class": "Product",
-            "description": "Holds the information about same data",
+            "class": "Customer",
+            "description": "A representation of a customer",
             "properties": [
-                {
-                    "name": "title",
-                    "description": "Title of the product",
-                    "dataType": ["text"],
-                },
-                {
-                    "name": "description",
-                    "description": "Description of the product",
-                    "dataType": ["text"],
-                },
-                {
-                    "name": "price",
-                    "description": "Price of the product",
-                    "dataType": ["number"],
-                }
-            ],
-            "vectorizer": "text2vec-huggingface",
-            "moduleConfig": {
-                "model": "BAAI/bge-base-en",
-            }
+                {"name": "Cust_ID", "dataType": ["int"], "description": "Unique customer ID"},
+                {"name": "Name", "dataType": ["string"], "description": "Customer's name"},
+                {"name": "Age", "dataType": ["int"], "description": "Customer's age"},
+                {"name": "Gender", "dataType": ["string"], "description": "Customer's gender"},
+                {"name": "Location", "dataType": ["string"], "description": "Customer's location"},
+                {"name": "Marital_Status", "dataType": ["string"], "description": "Customer's marital status"},
+                {"name": "Education", "dataType": ["string"], "description": "Customer's education level"},
+                {"name": "Occupation", "dataType": ["string"], "description": "Customer's occupation"},
+                {"name": "MOB", "dataType": ["string"], "description": "Customer's mobile phone number"},
+                {"name": "Income", "dataType": ["int"], "description": "Customer's income"},
+                {"name": "Dependents", "dataType": ["int"], "description": "Number of dependents"},
+                {"name": "Digital_ind", "dataType": ["boolean"], "description": "Indicates if the customer is digital-savvy"},
+                {"name": "Phone", "dataType": ["string"], "description": "Customer's phone model"},
+                {"name": "Address", "dataType": ["string"], "description": "Customer's address"}
+            ]
         }
-    ],
-
+    ]
 }
 
 # Create the schema in Weaviate
 client.schema.create(schema)
 
-# Load Products data
-with open('backend/data.json', 'r') as f:
-    product_data = json.load(f)
+# Load Customer data
+with open('data.json', 'r') as f:
+    customer_data = json.load(f)
 
-vectorized_products = []
+# Create the customers in Weaviate
+for customer_info in customer_data:
 
-for product_info in product_data:
-    title = product_info['title']
-    description = product_info['description']
-    price = product_info['price']
+    client.data_object.create(customer_info, "Customer")
 
-    vectorized_products.append({
-        'product_id': str(uuid.uuid4()),
-        "title": title,
-        "description": description,
-        "price": price
-    })
+print("Customer Data Entered Successfully")
 
-# Create the products in Weaviate
-for product in vectorized_products:
-    print(product)
-    client.data_object.create(product, "Product")
-print()
-print("Data Entered Successfully")
 
-# for input in sys.stdin:
-#     response = (
-#         client.query
-#         .get("Product", ["title", "description", "price"])
-#         .with_near_text({
-#             "concepts": [input]
-#         }).with_limit(1)
-#         .with_additional(["distance"])
-#         .do()
-#     )
-    
-#     print(json.dumps(response, indent=2))
