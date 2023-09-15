@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { FcSpeaker } from "react-icons/fc";
 import { HiMiniSpeakerWave, HiSpeakerWave } from "react-icons/hi2";
@@ -53,22 +53,28 @@ function Chat() {
   const [chatMessages, setChatMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
 
-  const [text, setText] = useState("hey man ");
+  const [text, setText] = useState("hello world");
 
   const { speak } = useSpeechSynthesis();
 
-  const handleOnClick = () => {
+  const messagesEnd = React.useRef(null);
+
+  useEffect(() => {
+    messagesEnd.current?.scrollIntoView({ behavior: "smooth" });
+  },[chatMessages]);
+
+  const handleSpeakText = () => {
     speak({ text: text });
   };
 
   const sendMessageToAPI = async (message) => {
     try {
-      const response = await fetch("http://172.20.10.2:5100/api/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user_input: message }),
+        body: JSON.stringify({ user_input: message }) ,
       });
 
       if (response.ok) {
@@ -76,7 +82,7 @@ function Chat() {
 
         console.log(data);
 
-        return data.answer;
+        return data.response;
       } else {
         throw new Error("API request failed");
       }
@@ -90,23 +96,25 @@ function Chat() {
     if (userInput.trim() === "") {
       return;
     }
-
+  
     // Update chatMessages using prevState pattern
     setChatMessages((prevState) => [
       ...prevState,
       { text: userInput, isUserMessage: true },
     ]);
-
+  
     try {
       // Send the user's message to the API and get the chatbot's response
       const chatbotResponse = await sendMessageToAPI(userInput);
-
+  
       // Update chatMessages with the chatbot's response
       setChatMessages((prevState) => [
         ...prevState,
         { text: chatbotResponse, isUserMessage: false },
       ]);
 
+      setText(chatbotResponse);
+  
       // Clear the input field
       setUserInput("");
     } catch (error) {
@@ -114,6 +122,16 @@ function Chat() {
       console.error("Error sending message to API:", error);
       // You can update the state or show an error message to the user here
     }
+    setUserInput();
+  };
+  
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleUserMessageSubmit();
+      setUserInput("");
+    }
+
   };
 
   return (
@@ -149,18 +167,39 @@ function Chat() {
                                 alt=""
                               />
                             ) : (
+                              <>
                               <img
                                 className="w-12 h-12 rounded-full"
                                 src="/bot.jpg"
                                 alt=""
                               />
+
+<div>
+                            <button
+                            onClick={handleSpeakText}
+                            className="p-2 rounded-full flex p-2"
+                          >
+                            <h1 className="text-sm text-black italic underline">
+                              Listen now
+                            </h1>
+                            <HiSpeakerWave className="ml-2" />
+                          </button>
+                            </div>
+                              </>
+                              
                             )}
+
+                            
+
+                            
                           </div>
 
-                          <span className="block">{message.text}</span>
+                          {renderTextWithCodeBlocks(message.text)}
+
                         </div>
                       </li>
                     ))}
+                    <div ref={messagesEnd}></div>
                   </ul>
                 </div>
 
@@ -172,10 +211,11 @@ function Chat() {
                     name="message"
                     value={userInput}
                     onChange={(e) => setUserInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
                     required
                   />
 
-                  <button type="submit" onClick={handleUserMessageSubmit}>
+<button type="submit" onClick={() => { handleUserMessageSubmit(); setUserInput(""); }}>
                     <svg
                       className="w-5 h-5 text-green-500 origin-center transform rotate-90"
                       xmlns="http://www.w3.org/2000/svg"

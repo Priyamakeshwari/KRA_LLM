@@ -1,6 +1,6 @@
 
 from flask import Flask, request,jsonify, stream_with_context
-from flask_socketio import SocketIO, send, emit
+
 from auth.auth import register_user, generate_token, login_user
 from engine import  load_model
 import datetime
