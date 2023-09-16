@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import { FcSpeaker } from "react-icons/fc";
 import { HiMiniSpeakerWave, HiSpeakerWave } from "react-icons/hi2";
-
+import { AiFillFilePdf } from 'react-icons/ai'
 import { useSpeechSynthesis } from "react-speech-kit";
 import CodeBlock from "./CodeBlock";
 
@@ -24,7 +24,7 @@ function renderTextWithCodeBlocks(text) {
       result.push(<CodeBlock key={index} code={code} />);
     } else {
       // If it's regular text, add it as a paragraph
-      result.push(<p key={index}>{paragraph}</p>);
+      result.push(<p className="text-slate-900 text-lg mt-2" key={index}>{paragraph}</p>);
     }
   });
 
@@ -32,26 +32,12 @@ function renderTextWithCodeBlocks(text) {
 }
 
 function Chat() {
-  const exampleText = `
 
-   This is the normal text 
-
-  sql SELECT * FROM customers
-  WHERE Income > (
-    SELECT AVG(Income)
-    FROM customers
-  );
-
-  This query uses a subquery to find the average income of all customers.
-
-  sql SELECT Name, Age FROM customers WHERE Age > 30;
-  Another SQL query to retrieve names and ages of customers above 30.
-
-    
-  `;
 
   const [chatMessages, setChatMessages] = useState([]);
   const [userInput, setUserInput] = useState("");
+  const [pdfBase64, setPdfBase64] = useState('');
+  const [imageBase64, setImageBase64] = useState('')
 
   const [text, setText] = useState("hello world");
 
@@ -61,28 +47,39 @@ function Chat() {
 
   useEffect(() => {
     messagesEnd.current?.scrollIntoView({ behavior: "smooth" });
-  },[chatMessages]);
+  }, [chatMessages]);
 
   const handleSpeakText = () => {
     speak({ text: text });
   };
 
   const sendMessageToAPI = async (message) => {
+    var apiRoute = '/api/chat';
+    if (message.includes("report") || message.includes("generate")) {
+      apiRoute = "/api/report"; // Use the report generation API route
+    }
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch(apiRoute, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ user_input: message }) ,
+        body: JSON.stringify({ user_input: message }),
       });
 
       if (response.ok) {
         const data = await response.json();
 
         console.log(data);
+        if (data.file) {
+          setPdfBase64(data.file);
+          console.log('got file')
+        }
+        if (data.image) {
+          setImageBase64(data.image)
+        }
 
-        return data.response;
+        if (data.response) return data.response;
       } else {
         throw new Error("API request failed");
       }
@@ -96,17 +93,17 @@ function Chat() {
     if (userInput.trim() === "") {
       return;
     }
-  
+
     // Update chatMessages using prevState pattern
     setChatMessages((prevState) => [
       ...prevState,
       { text: userInput, isUserMessage: true },
     ]);
-  
+
     try {
       // Send the user's message to the API and get the chatbot's response
       const chatbotResponse = await sendMessageToAPI(userInput);
-  
+
       // Update chatMessages with the chatbot's response
       setChatMessages((prevState) => [
         ...prevState,
@@ -114,7 +111,7 @@ function Chat() {
       ]);
 
       setText(chatbotResponse);
-  
+
       // Clear the input field
       setUserInput("");
     } catch (error) {
@@ -124,7 +121,7 @@ function Chat() {
     }
     setUserInput();
   };
-  
+
   const handleKeyPress = (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -132,6 +129,23 @@ function Chat() {
       setUserInput("");
     }
 
+  };
+
+  const handleDownloadPdf = () => {
+    if (pdfBase64) {
+      const pdfBlob = new Blob([atob(pdfBase64)], { type: "application/pdf" });
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      // Create a temporary anchor element to trigger the download
+      const a = document.createElement("a");
+      a.href = pdfUrl;
+      a.download = "report.pdf"; // Set the desired download filename
+      a.click();
+
+      // Revoke the URL to free up resources
+      URL.revokeObjectURL(pdfUrl);
+      setPdfBase64('')
+    }
   };
 
   return (
@@ -148,57 +162,94 @@ function Chat() {
                     {chatMessages.map((message, index) => (
                       <li
                         key={index}
-                        className={`${
-                          message.isUserMessage
-                            ? "flex justify-end"
-                            : "flex justify-start"
-                        } my-0`}
+                        className={`${message.isUserMessage
+                          ? "flex justify-end"
+                          : "flex justify-start"
+                          } my-0`}
                       >
                         <div
-                          className={`relative max-w-xl px-4 py-2 text-blue-800 bg-blue-100 rounded shadow ${
-                            message.isUserMessage ? "flex flex-col" : ""
-                          }`}
+                          className={`relative max-w-xl px-4 py-2 text-blue-700 bg-blue-100 rounded shadow ${message.isUserMessage ? "flex flex-col" : ""
+                            }`}
                         >
                           <div className="flex items-center justify-between">
                             {message.isUserMessage ? (
-                              <img
-                                className="w-12 h-12 rounded-full"
-                                src="/user.avif"
-                                alt=""
-                              />
+                              <>
+                                <img
+                                  className="w-12 h-12 rounded-full"
+                                  src="/user.avif"
+                                  alt=""
+                                />
+                                <h2 className="text-md mx-2 font-semibold text-black italic"> You</h2>
+                              </>
                             ) : (
                               <>
-                              <img
-                                className="w-12 h-12 rounded-full"
-                                src="/bot.jpg"
-                                alt=""
-                              />
+                                <img
+                                  className="w-12 h-12 rounded-full"
+                                  src="/bot.jpg"
+                                  alt=""
+                                />
+                                <h2 className="text-md mx-2 font-semibold text-black italic"> Bot</h2>
 
-<div>
-                            <button
-                            onClick={handleSpeakText}
-                            className="p-2 rounded-full flex p-2"
-                          >
-                            <h1 className="text-sm text-black italic underline">
-                              Listen now
-                            </h1>
-                            <HiSpeakerWave className="ml-2" />
-                          </button>
-                            </div>
+                                <div>
+                                  <button
+                                    onClick={handleSpeakText}
+                                    className="p-2 rounded-full flex "
+                                  >
+                                    <h1 className="text-sm text-black italic underline">
+                                      Listen now
+                                    </h1>
+                                    <HiSpeakerWave className="ml-2" />
+                                  </button>
+                                </div>
                               </>
-                              
                             )}
-
-                            
-
-                            
                           </div>
-
                           {renderTextWithCodeBlocks(message.text)}
-
                         </div>
                       </li>
                     ))}
+                    {
+                      pdfBase64 && (
+                        <div
+                          className={`relative max-w-max px-4 py-2 text-blue-700 bg-blue-100 rounded shadow
+                        }`}
+                        >
+                          {
+                            pdfBase64 && (
+                              <div className="flex justify-start">
+                                <AiFillFilePdf className="w-8 h-8 rounded-full text-green-500" />
+                                <button
+                                  onClick={handleDownloadPdf}
+                                  className="item-center ml-2 justify-center italic text-blue-500 underline"
+                                >
+                                  Download Report
+                                </button>
+                              </div>
+                            )
+                          }
+                        </div>
+                      )
+                    }
+                    {
+                      imageBase64 && (
+                        <div
+                          className={`relative max-w-max px-4 py-2 text-blue-700 bg-blue-100 rounded shadow
+                        }`}
+                        >
+                          {
+                            imageBase64 && (
+                              <div className="flex justify-start">
+                                <img
+                                  src={`data:image/png;base64,${imageBase64}`}
+                                  alt="User Image"
+                                  className="w-64 h-64 rounded-full text-green-500"
+                                />
+                              </div>
+                            )
+                          }
+                        </div>
+                      )
+                    }
                     <div ref={messagesEnd}></div>
                   </ul>
                 </div>
@@ -215,7 +266,7 @@ function Chat() {
                     required
                   />
 
-<button type="submit" onClick={() => { handleUserMessageSubmit(); setUserInput(""); }}>
+                  <button type="submit" onClick={() => { handleUserMessageSubmit(); setUserInput(""); }}>
                     <svg
                       className="w-5 h-5 text-green-500 origin-center transform rotate-90"
                       xmlns="http://www.w3.org/2000/svg"

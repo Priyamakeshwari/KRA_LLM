@@ -15,6 +15,9 @@ import { ImBin } from "react-icons/im";
 import { BsChatRightDotsFill } from "react-icons/bs";
 const Sidebar = () => {
   const [open, setOpen] = useState(true);
+  const handleClearChat = () => {
+    window.location.reload();
+  }
   return (
     <div className="">
       <div
@@ -60,7 +63,7 @@ const Sidebar = () => {
 
           <div className="  absolute bottom-4 ">
             <Link
-              to={"/"}
+              onClick={handleClearChat}
               className={` mt-5 group flex items-center text-lg  gap-3.5 font-medium p-2 hover:bg-green-500 rounded-md`}
             >
               <div className="text-green-500">
@@ -76,7 +79,7 @@ const Sidebar = () => {
               </h2>
             </Link>
             <Link
-              to={"/"}
+              to={"/login"}
               className={` mt-5 group flex items-center text-lg  gap-3.5 font-medium p-2 hover:bg-green-500 rounded-md`}
             >
               <div className="text-green-500">
